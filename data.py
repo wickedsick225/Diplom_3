@@ -1,4 +1,3 @@
-# data.py
 from faker import Faker
 
 faker = Faker()

@@ -33,11 +33,9 @@ class MainPage(BasePage):
 
     @allure.step("Добавляем ингредиент в заказ (drag and drop)")
     def add_first_ingredient_to_order(self):
-        # ждём появления ингредиента и панели заказа
         source = self.wait.until(EC.visibility_of_element_located(MainPageLocators.first_ingredient))
         target = self.wait.until(EC.visibility_of_element_located(MainPageLocators.order_panel))
         
-        # небольшое движение мыши к элементу — помогает при нестабильных dnd
         ActionChains(self.driver)\
             .move_to_element(source)\
             .click_and_hold(source)\

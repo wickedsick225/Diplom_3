@@ -1,4 +1,3 @@
-# pages/order_feed_page.py
 import requests
 import allure
 from pages.base_page import BasePage
@@ -8,6 +7,14 @@ from data import generate_user
 
 
 class OrderFeedPage(BasePage):
+
+    @allure.step("Авторизуемся через UI")
+    def login_ui(self, email, password):
+        self.click(MainPageLocators.personal_account_btn)
+        self.type_text(MainPageLocators.email_field_auth, email)
+        self.type_text(MainPageLocators.password_field_auth, password)
+        self.click(MainPageLocators.login_auth_btn)
+        self.is_visible(MainPageLocators.set_order_btn)
 
     @allure.step("Получаем количество выполненных заказов за всё время")
     def get_total_orders(self):
@@ -22,23 +29,19 @@ class OrderFeedPage(BasePage):
         return len(self.driver.find_elements(*MainPageLocators.order_items))
 
     @staticmethod
+    @allure.step("Создаём пользователя через API")
     def create_user_api():
-        """Создаёт пользователя через API и возвращает user_data и токен (accessToken)."""
         user_data = generate_user()
         response = requests.post(URLS.CREATE_USER, json=user_data)
         response.raise_for_status()
-        # API обычно возвращает accessToken — может быть с префиксом "Bearer "
         access_token = response.json().get("accessToken")
         return user_data, access_token
 
     @staticmethod
+    @allure.step("Удаляем пользователя через API")
     def delete_user_api(access_token):
-        """Удаляет пользователя через API. Приводит токен к виду 'Bearer ...' если нужно."""
         if not access_token:
             return
-        token = access_token
-        # Если токен не содержит 'Bearer ' — добавим его
-        if not token.strip().lower().startswith("bearer "):
-            token = f"Bearer {token}"
+        token = access_token if access_token.startswith("Bearer ") else f"Bearer {access_token}"
         headers = {"Authorization": token}
         requests.delete(URLS.DELETE_USER, headers=headers)
