@@ -7,11 +7,12 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from pages.order_feed_page import OrderFeedPage
 from urls import URLS
+from helpers import create_user_api, delete_user_api
 
 
 @pytest.fixture(params=["chrome"])
 def driver(request):
-    browser = request.param  # получаем строку "chrome"
+    browser = request.param
     if browser == "chrome":
         options = ChromeOptions()
         options.add_argument("--start-maximized")
@@ -27,12 +28,14 @@ def driver(request):
 
 @pytest.fixture
 def authorized_user(driver):
-    feed_page = OrderFeedPage(driver)
-    user_data, access_token = feed_page.create_user_api()
+    with allure.step("Создаём и авторизуем пользователя через API и UI"):
+        feed_page = OrderFeedPage(driver)
+        user_data, access_token = create_user_api()
 
-    feed_page.open(URLS.BASE_URL)
-    feed_page.login_ui(user_data["email"], user_data["password"])
+        feed_page.open(URLS.BASE_URL)
+        feed_page.login_ui(user_data["email"], user_data["password"])
 
     yield driver
 
-    feed_page.delete_user_api(access_token)
+    with allure.step("Удаляем пользователя через API"):
+        delete_user_api(access_token)

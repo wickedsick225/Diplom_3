@@ -27,6 +27,7 @@ class TestConstructor:
         page.open_main_page(URLS.BASE_URL)
         page.open_first_ingredient_popup()
         page.close_popup()
+        assert page.is_not_visible(page.locators.popup_window), "Окно ингредиента не закрылось"
 
     @allure.title("Добавление ингредиента увеличивает счётчик")
     def test_ingredient_counter_increases(self, driver):
